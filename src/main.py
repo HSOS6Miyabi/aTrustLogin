@@ -268,7 +268,10 @@ class ATrustLogin:
         return element
 
     def set_cli_cookie(self, force=False):
-        if force or not self.driver.get_cookie("tid"):
+        # --cookie_tid / --cookie_sig are optional. Passing None to add_cookie()
+        # makes chromedriver fail with "invalid argument: missing 'value'",
+        # which aborts init() and leaves the autologin retrying forever.
+        if self.cookie_tid and (force or not self.driver.get_cookie("tid")):
             self.driver.delete_cookie("tid")
             self.driver.add_cookie({
                 "name": "tid",
@@ -277,7 +280,7 @@ class ATrustLogin:
                 "path": "/"
             })
 
-        if force or not self.driver.get_cookie("tid.sig"):
+        if self.cookie_sig and (force or not self.driver.get_cookie("tid.sig")):
             self.driver.delete_cookie("tid.sig")
             self.driver.add_cookie({
                 "name": "tid.sig",
