@@ -27,7 +27,7 @@ class ATrustLogin:
         self.initialized = False
         self.container_mode = container_mode
         if not os.path.exists(data_dir):
-            os.makedirs(data_dir, exist_ok=True)
+            os.makedirs(data_dir, mode=0o700, exist_ok=True)
         self.data_dir = data_dir
         self.interactive = interactive
         self.portal_address = portal_address
