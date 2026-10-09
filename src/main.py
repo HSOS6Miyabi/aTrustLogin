@@ -1,6 +1,4 @@
-import json
 import os.path
-import pickle
 import platform
 import socket
 import subprocess
@@ -16,6 +14,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+
+from session_storage import read_session, write_session
 
 
 class ATrustLoginStorage(BaseModel):
@@ -241,21 +241,22 @@ class ATrustLogin:
         logger.info("未找到符合条件的登录按钮")
 
     def load_storage(self):
-        # 从pickle文件中加载存储的数据
         try:
-            if os.path.exists(os.path.join(self.data_dir, "ATrustLoginStorage.pkl")):
-                with open(os.path.join(self.data_dir, "ATrustLoginStorage.pkl"), "rb") as f:
-                    data = pickle.load(f)
-                    # 从cookies中加载cookie
-                    for cookie in data.cookies:
-                        self.driver.delete_cookie(cookie['name'])
-                        self.driver.add_cookie(cookie)
-                    # 从local_storage中加载local storage
-                    for key, value in data.local_storage.items():
-                        self.driver.execute_script(f"window.localStorage.setItem('{key}', '{value}')")
-                    logger.info("Loaded storage data")
+            data = ATrustLoginStorage(**read_session(self.data_dir))
         except FileNotFoundError:
-            logger.info("未找到存储的数据")
+            logger.info("No saved session data found")
+        except (OSError, ValueError, TypeError) as exc:
+            logger.warning("Ignoring invalid session storage: {}", type(exc).__name__)
+        else:
+            for cookie in data.cookies:
+                self.driver.delete_cookie(cookie["name"])
+                self.driver.add_cookie(cookie)
+            for key, value in data.local_storage.items():
+                self.driver.execute_script(
+                    "window.localStorage.setItem(arguments[0], arguments[1]);",
+                    key, value
+                )
+            logger.info("Loaded storage data")
 
         self.set_cli_cookie(force=False)
 
@@ -334,7 +335,6 @@ class ATrustLogin:
                 totp = pyotp.TOTP(totp_key)
                 totp_code = totp.now()
 
-                logger.info(f"TOTP code: {totp_code}")
                 totp_input = self.driver.find_element(By.XPATH, "//input[contains(@class, 'totp')]")
 
                 self.scroll_and_click(self.wait.until(EC.element_to_be_clickable(totp_input)))
@@ -345,7 +345,7 @@ class ATrustLogin:
                 self.wait.until(EC.element_to_be_clickable(submit_button))
                 self.delay_input()
                 self.scroll_and_click(submit_button)
-                logger.info(f"Performed TOTP login action with code: {totp_code}")
+                logger.info("Performed TOTP login action")
                 self.delay_loading()
             else:
                 logger.info("Need to handle TOTP, press any key to continue")
@@ -389,9 +389,7 @@ class ATrustLogin:
             local_storage=self.driver.execute_script("return window.localStorage")
         )
 
-        # save with pickle
-        with open(os.path.join(self.data_dir, "ATrustLoginStorage.pkl"), "wb") as f:
-            pickle.dump(data, f)
+        write_session(self.data_dir, data.dict())
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
