@@ -50,7 +50,7 @@ pip install -r requirements.txt
 - `--cookie_tid`：用于会话追踪的 cookie ID（可选，用于绕过图形验证码）。具体见后文
 - `--cookie_sig`：用于会话追踪的 cookie 签名（可选，用于绕过图形验证码）。具体见后文
 - `--keepalive`：可选。会话保持时间（秒），每隔几秒后刷新页面检查是否掉线。0 为禁用
-- `--data_dir`：可选。存储 cookies 和会话数据的目录路径。
+- `--data_dir`：可选。存储 Cookie 和会话数据的目录路径。会话数据保存为 `ATrustLoginStorage.json`，其中包含敏感认证信息，请妥善保护该目录。旧版 `ATrustLoginStorage.pkl` 不会自动导入，升级后首次登录需要重新完成验证。
 - `--driver_type`：可选。WebDriver 类型（如 "chrome" 或 "edge"）。
 - `--driver_path`：可选。WebDriver 可执行文件路径。
 - `--browser_path`：可选。浏览器可执行文件路径。
