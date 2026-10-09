@@ -25,6 +25,7 @@ RUN echo "Begin build" && \
     mkdir -p ~/.pip && \
     date > /etc/build-date.txt && \
     sed -i 's|http://deb.debian.org|https://mirrors.ustc.edu.cn|g; s|http://security.debian.org|https://mirrors.ustc.edu.cn/debian-security|g' /etc/apt/sources.list && \
+    printf 'Package: libxnvctrl0\nPin: release n=bookworm\nPin-Priority: 990\n' > /etc/apt/preferences.d/libxnvctrl0-bookworm && \
     echo "[global]" > ~/.pip/pip.conf && \
     echo "index-url = https://mirrors.ustc.edu.cn/pypi/web/simple" >> ~/.pip/pip.conf && \
     chmod +x /bin/start-with-autologin.sh && \
