@@ -50,7 +50,7 @@ The following parameters are supported:
 - `--cookie_tid`: Cookie ID for session tracking (optional, to bypass CAPTCHA)
 - `--cookie_sig`: Cookie signature for session tracking (optional, to bypass CAPTCHA)
 - `--keepalive`: Optional. Session keep-alive interval in seconds. `0` disables it.
-- `--data_dir`: Optional. Path to store cookies and session data.
+- `--data_dir`: Optional. Path to store cookies and session data. The session is saved as `ATrustLoginStorage.json` and contains sensitive authentication information; protect this directory. Legacy `ATrustLoginStorage.pkl` files are not imported, so the first login after upgrading requires authentication again.
 - `--driver_type`: Optional. WebDriver type (e.g., "chrome", "edge").
 - `--driver_path`: Optional. Path to the WebDriver executable.
 - `--browser_path`: Optional. Path to the browser executable.
